@@ -1,9 +1,9 @@
 node_modules/
-dist/
+/dist/
+/packages/*/dist/
 coverage/
 *.tgz
 .DS_Store
 .env
 .env.*
 !.env.example
-

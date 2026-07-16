@@ -1,6 +1,6 @@
 {
   "name": "xuantian-bazi",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Self-contained BaZi chart calculation engine with true solar time, cycles and Shen Sha",
   "keywords": [
     "bazi",
@@ -15,7 +15,7 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "bin": {
-    "xuantian-bazi-calculate": "./bin/cli.cjs"
+    "xuantian-bazi-calculate": "bin/cli.cjs"
   },
   "exports": {
     ".": {

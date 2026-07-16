@@ -166,15 +166,15 @@ const cycleResult = cycles({
 
 ```bash
 echo '{"gender":1,"calendar_type":1,"birth_date":"1990-01-01","birth_time":"08:30"}' \
-  | npx xuantian-bazi-calculate
+  | npx --yes --package xuantian-bazi xuantian-bazi-calculate
 ```
 
 通过参数或文件：
 
 ```bash
-npx xuantian-bazi-calculate --data '{"gender":1,"birth_date":"1990-01-01","birth_time":"08:30"}'
-npx xuantian-bazi-calculate --file input.json --pretty
-npx xuantian-bazi-calculate --action cycles --file cycles.json --pretty
+npx --yes --package xuantian-bazi xuantian-bazi-calculate --data '{"gender":1,"birth_date":"1990-01-01","birth_time":"08:30"}'
+npx --yes --package xuantian-bazi xuantian-bazi-calculate --file input.json --pretty
+npx --yes --package xuantian-bazi xuantian-bazi-calculate --action cycles --file cycles.json --pretty
 ```
 
 ### MCP 用法
@@ -369,15 +369,15 @@ Using stdin:
 
 ```bash
 echo '{"gender":1,"calendar_type":1,"birth_date":"1990-01-01","birth_time":"08:30"}' \
-  | npx xuantian-bazi-calculate
+  | npx --yes --package xuantian-bazi xuantian-bazi-calculate
 ```
 
 Using inline JSON or a file:
 
 ```bash
-npx xuantian-bazi-calculate --data '{"gender":1,"birth_date":"1990-01-01","birth_time":"08:30"}'
-npx xuantian-bazi-calculate --file input.json --pretty
-npx xuantian-bazi-calculate --action cycles --file cycles.json --pretty
+npx --yes --package xuantian-bazi xuantian-bazi-calculate --data '{"gender":1,"birth_date":"1990-01-01","birth_time":"08:30"}'
+npx --yes --package xuantian-bazi xuantian-bazi-calculate --file input.json --pretty
+npx --yes --package xuantian-bazi xuantian-bazi-calculate --action cycles --file cycles.json --pretty
 ```
 
 ### MCP usage
@@ -572,15 +572,15 @@ stdin を使用する場合：
 
 ```bash
 echo '{"gender":1,"calendar_type":1,"birth_date":"1990-01-01","birth_time":"08:30"}' \
-  | npx xuantian-bazi-calculate
+  | npx --yes --package xuantian-bazi xuantian-bazi-calculate
 ```
 
 JSON 引数またはファイルを使用する場合：
 
 ```bash
-npx xuantian-bazi-calculate --data '{"gender":1,"birth_date":"1990-01-01","birth_time":"08:30"}'
-npx xuantian-bazi-calculate --file input.json --pretty
-npx xuantian-bazi-calculate --action cycles --file cycles.json --pretty
+npx --yes --package xuantian-bazi xuantian-bazi-calculate --data '{"gender":1,"birth_date":"1990-01-01","birth_time":"08:30"}'
+npx --yes --package xuantian-bazi xuantian-bazi-calculate --file input.json --pretty
+npx --yes --package xuantian-bazi xuantian-bazi-calculate --action cycles --file cycles.json --pretty
 ```
 
 ### MCP の使い方
