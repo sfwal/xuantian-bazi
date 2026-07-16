@@ -1,0 +1,53 @@
+{
+  "name": "xuantian-bazi-mcp",
+  "version": "0.1.0",
+  "description": "MCP stdio server for the Xuantian BaZi chart engine",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "bazi",
+    "八字"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "xuantian-bazi-mcp": "./dist/cli.mjs"
+  },
+  "main": "./dist/server.mjs",
+  "types": "./dist/server.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.mjs"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist coverage",
+    "start": "node dist/cli.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "xuantian-bazi": "0.1.0",
+    "zod": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sfwal/xuantian-bazi.git",
+    "directory": "packages/mcp"
+  }
+}

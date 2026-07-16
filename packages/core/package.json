@@ -1,0 +1,54 @@
+{
+  "name": "xuantian-bazi",
+  "version": "0.1.0",
+  "description": "Self-contained BaZi chart calculation engine with true solar time, cycles and Shen Sha",
+  "keywords": [
+    "bazi",
+    "八字",
+    "四柱",
+    "chinese-calendar",
+    "fortune"
+  ],
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "xuantian-bazi-calculate": "./bin/cli.cjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "bin",
+    "dist",
+    "licenses",
+    "LICENSE",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist coverage",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sfwal/xuantian-bazi.git",
+    "directory": "packages/core"
+  }
+}

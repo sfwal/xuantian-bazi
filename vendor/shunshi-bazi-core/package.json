@@ -1,0 +1,56 @@
+{
+  "name": "shunshi-bazi-core",
+  "version": "0.2.0",
+  "description": "Bazi (八字 / Chinese Four Pillars) calculation library — powered by Shunshi.AI, with true solar time correction built in. Zero framework deps, pure TypeScript.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "bazi",
+    "八字",
+    "命理",
+    "四柱推命",
+    "shichu-suimei",
+    "사주",
+    "saju",
+    "사주팔자",
+    "saju-palja",
+    "명리",
+    "shunshi",
+    "shunshi.ai",
+    "顺时",
+    "chinese-astrology",
+    "japanese-astrology",
+    "korean-astrology",
+    "four-pillars",
+    "true-solar-time",
+    "tyme4ts"
+  ],
+  "author": "Shunshi.AI (https://shunshi.ai)",
+  "license": "MIT",
+  "homepage": "https://github.com/shunshi-ai/bazi-reader-mcp/tree/main/packages/bazi-core#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shunshi-ai/bazi-reader-mcp.git",
+    "directory": "packages/bazi-core"
+  },
+  "bugs": {
+    "url": "https://github.com/shunshi-ai/bazi-reader-mcp/issues"
+  },
+  "dependencies": {
+    "tyme4ts": "^1.3.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

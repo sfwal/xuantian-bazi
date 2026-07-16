@@ -1,0 +1,26 @@
+{
+  "name": "@openfate/true-solar-time",
+  "version": "4.0.2",
+  "description": "High-precision True Solar Time (真太阳时) calculator featuring Longitude Compensation and Equation of Time, extracted from OpenFate.ai core engine.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": {
+    "name": "OpenFate Engineering",
+    "url": "https://openfate.ai"
+  },
+  "homepage": "https://openfate.ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openfate-ai/true-solar-time.git"
+  },
+  "keywords": [
+    "真太阳时",
+    "真太阳算法",
+    "astrology",
+    "solar-time",
+    "true-solar-time",
+    "openfate"
+  ],
+  "license": "MIT",
+  "dependencies": {}
+}

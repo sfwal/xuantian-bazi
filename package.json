@@ -1,0 +1,38 @@
+{
+  "name": "xuantian-bazi-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Open-source BaZi chart engine and MCP server",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sfwal/xuantian-bazi.git"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "clean": "npm run clean --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces",
+    "check": "npm run typecheck && npm run build && npm test",
+    "pack:check": "npm pack --workspace xuantian-bazi --dry-run && npm pack --workspace xuantian-bazi-mcp --dry-run"
+  },
+  "devDependencies": {
+    "@openfate/true-solar-time": "file:vendor/true-solar-time",
+    "@types/node": "^22.15.0",
+    "lunar-javascript": "file:vendor/lunar-javascript",
+    "shunshi-bazi-core": "file:vendor/shunshi-bazi-core",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "tyme4ts": "file:vendor/tyme4ts",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  },
+  "packageManager": "npm@10"
+}

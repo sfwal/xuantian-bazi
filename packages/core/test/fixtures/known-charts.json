@@ -1,0 +1,46 @@
+{
+  "solar_beijing": {
+    "input": {
+      "gender": "male",
+      "birthDate": "1990-01-01",
+      "birthTime": "08:30",
+      "longitude": 116.4074,
+      "timeZone": "Asia/Shanghai",
+      "trueSolarTime": true
+    },
+    "chartDateTime": "1990-01-01T08:12:19",
+    "pillars": ["己巳", "丙子", "丙寅", "壬辰"],
+    "dayMaster": "丙",
+    "zodiac": "蛇",
+    "shenShaCount": 21
+  },
+  "dst_shanghai": {
+    "input": {
+      "gender": "female",
+      "birthDate": "1990-07-01",
+      "birthTime": "12:00",
+      "longitude": 116.4,
+      "timeZone": "Asia/Shanghai",
+      "trueSolarTime": true
+    },
+    "chartDateTime": "1990-07-01T10:41:54",
+    "pillars": ["庚午", "壬午", "丁卯", "乙巳"],
+    "dayMaster": "丁",
+    "zodiac": "马",
+    "shenShaCount": 19
+  },
+  "lunar_new_year": {
+    "input": {
+      "gender": "male",
+      "calendar": "lunar",
+      "birthDate": "2020-01-01",
+      "birthTime": "12:00",
+      "trueSolarTime": false
+    },
+    "chartDateTime": "2020-01-25T12:00:00",
+    "pillars": ["己亥", "丁丑", "丁卯", "丙午"],
+    "dayMaster": "丁",
+    "zodiac": "猪",
+    "shenShaCount": 12
+  }
+}
