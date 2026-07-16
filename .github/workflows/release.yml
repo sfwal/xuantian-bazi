@@ -8,6 +8,10 @@ permissions:
   contents: read
   id-token: write
 
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -21,5 +25,25 @@ jobs:
       - run: npm install --global npm@latest
       - run: npm ci
       - run: npm run check
-      - run: npm publish --workspace xuantian-bazi
-      - run: npm publish --workspace xuantian-bazi-mcp
+      - name: Publish packages that are not on npm yet
+        shell: bash
+        run: |
+          publish_if_missing() {
+            local package_json="$1"
+            local workspace="$2"
+            local package_name
+            local package_version
+
+            package_name=$(node -p "require('./${package_json}').name")
+            package_version=$(node -p "require('./${package_json}').version")
+
+            if npm view "${package_name}@${package_version}" version >/dev/null 2>&1; then
+              echo "${package_name}@${package_version} is already published; skipping."
+              return
+            fi
+
+            npm publish --workspace "${workspace}"
+          }
+
+          publish_if_missing packages/core/package.json xuantian-bazi
+          publish_if_missing packages/mcp/package.json xuantian-bazi-mcp
