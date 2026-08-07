@@ -1,6 +1,6 @@
 {
   "name": "xuantian-bazi",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Self-contained BaZi chart calculation engine with true solar time, cycles and Shen Sha",
   "keywords": [
     "bazi",

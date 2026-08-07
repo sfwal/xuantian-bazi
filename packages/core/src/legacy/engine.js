@@ -17,6 +17,61 @@ function slimCycles(cycles) {
   };
 }
 
+function buildTransitInteractions(normalizedChart, decade, yearCycle) {
+  const sources = (normalizedChart.pillars || []).map((pillar) => ({
+    label: `原局${pillar.label || pillar.type || '命柱'}`,
+    gan: pillar.tianGan || String(pillar.ganZhi || '').slice(0, 1),
+    zhi: pillar.diZhi || String(pillar.ganZhi || '').slice(1, 2),
+    transit: false,
+  }));
+  if (decade?.label) {
+    sources.push({ label: '大运', gan: decade.label.slice(0, 1), zhi: decade.label.slice(1, 2), transit: true });
+  }
+  if (yearCycle?.label) {
+    sources.push({ label: '流年', gan: yearCycle.label.slice(0, 1), zhi: yearCycle.label.slice(1, 2), transit: true });
+  }
+
+  const ganHe = new Set(['甲己', '己甲', '乙庚', '庚乙', '丙辛', '辛丙', '丁壬', '壬丁', '戊癸', '癸戊']);
+  const ganChong = new Set(['甲庚', '庚甲', '乙辛', '辛乙', '丙壬', '壬丙', '丁癸', '癸丁']);
+  const ganElement = {
+    甲: '木', 乙: '木', 丙: '火', 丁: '火', 戊: '土', 己: '土', 庚: '金', 辛: '金', 壬: '水', 癸: '水',
+  };
+  const controls = { 木: '土', 火: '金', 土: '水', 金: '木', 水: '火' };
+  const zhiRules = {
+    六合: new Set(['子丑', '丑子', '寅亥', '亥寅', '卯戌', '戌卯', '辰酉', '酉辰', '巳申', '申巳', '午未', '未午']),
+    相冲: new Set(['子午', '午子', '丑未', '未丑', '寅申', '申寅', '卯酉', '酉卯', '辰戌', '戌辰', '巳亥', '亥巳']),
+    相刑: new Set(['寅巳', '巳寅', '巳申', '申巳', '寅申', '申寅', '丑戌', '戌丑', '戌未', '未戌', '丑未', '未丑', '子卯', '卯子', '辰辰', '午午', '酉酉', '亥亥']),
+    相害: new Set(['子未', '未子', '丑午', '午丑', '寅巳', '巳寅', '卯辰', '辰卯', '申亥', '亥申', '酉戌', '戌酉']),
+    相破: new Set(['子酉', '酉子', '丑辰', '辰丑', '寅亥', '亥寅', '卯午', '午卯', '巳申', '申巳', '未戌', '戌未']),
+  };
+
+  const interactions = [];
+  for (let i = 0; i < sources.length; i += 1) {
+    for (let j = i + 1; j < sources.length; j += 1) {
+      const first = sources[i];
+      const second = sources[j];
+      if (!first.transit && !second.transit) continue;
+
+      const ganPair = `${first.gan}${second.gan}`;
+      if (ganHe.has(ganPair)) interactions.push({ type: '天干', source_a: first.label, source_b: second.label, chars: ganPair, relation: '相合' });
+      if (ganChong.has(ganPair)) interactions.push({ type: '天干', source_a: first.label, source_b: second.label, chars: ganPair, relation: '相冲' });
+      const firstElement = ganElement[first.gan];
+      const secondElement = ganElement[second.gan];
+      if (firstElement && secondElement && controls[firstElement] === secondElement) {
+        interactions.push({ type: '天干', source_a: first.label, source_b: second.label, chars: ganPair, relation: `${first.gan}克${second.gan}` });
+      } else if (firstElement && secondElement && controls[secondElement] === firstElement) {
+        interactions.push({ type: '天干', source_a: first.label, source_b: second.label, chars: ganPair, relation: `${second.gan}克${first.gan}` });
+      }
+
+      const zhiPair = `${first.zhi}${second.zhi}`;
+      Object.entries(zhiRules).forEach(([relation, pairs]) => {
+        if (pairs.has(zhiPair)) interactions.push({ type: '地支', source_a: first.label, source_b: second.label, chars: zhiPair, relation });
+      });
+    }
+  }
+  return interactions;
+}
+
 /**
  * 执行完整排盘并返回标准化结果
  * @param {Object} input - 输入参数
@@ -171,7 +226,19 @@ function cycles(input) {
       data: {
         year: targetYear,
         month: targetMonth,
+        decade_cycle: decade ? {
+          label: decade.label,
+          value: decade.value,
+          sub_value: decade.sub_value,
+          active: decade.active,
+          start_age: decade.start_age,
+          end_age: decade.end_age,
+          start_year: decade.start_year,
+          end_year: decade.end_year,
+          main_star: decade.main_star,
+        } : null,
         year_cycle: yearCycle,
+        transit_interactions: buildTransitInteractions(normalizedChart, decade, yearCycle),
         monthly_cycles: monthlyCycles,
         daily_cycles: selectedMonth?.daily_cycles || [],
         locale: normalizedChart.locale,
@@ -230,13 +297,43 @@ function validateInput(input, locale) {
     errors.push(locale === 'en' ? 'birth_date must use YYYY-MM-DD' : localizeText('birth_date 格式需为 YYYY-MM-DD', locale));
   } else {
     const [year, month, day] = input.birth_date.split('-').map(Number);
-    const validSolarDate = (() => {
-      const value = new Date(Date.UTC(year, month - 1, day));
-      return value.getUTCFullYear() === year && value.getUTCMonth() + 1 === month && value.getUTCDate() === day;
-    })();
-    const validLunarDate = month >= 1 && month <= 12 && day >= 1 && day <= 30;
-    if ((input.calendar_type === 2 && !validLunarDate) || (input.calendar_type !== 2 && !validSolarDate)) {
-      errors.push(locale === 'en' ? 'birth_date is not a valid calendar date' : localizeText('birth_date 不是有效日期', locale));
+    if (year < 1800 || year > 2300) {
+      errors.push(locale === 'en'
+        ? 'birth_date year must be between 1800 and 2300'
+        : localizeText('birth_date 年份需在 1800 到 2300 之间', locale));
+    } else if (input.calendar_type === 2) {
+      if (month < 1 || month > 12 || day < 1 || day > 30) {
+        errors.push(locale === 'en'
+          ? 'lunar birth_date must contain a valid month and day'
+          : localizeText('农历 birth_date 的月份或日期无效', locale));
+      } else {
+        try {
+          const { LunarYear } = require('lunar-javascript');
+          const lunarYear = LunarYear.fromYear(year);
+          const monthNumber = input.is_leap_month ? -month : month;
+          const lunarMonth = lunarYear.getMonths().find((item) =>
+            item.getYear() === year && item.getMonth() === monthNumber);
+          if (!lunarMonth || day > lunarMonth.getDayCount()) {
+            errors.push(locale === 'en'
+              ? 'lunar birth_date day does not exist in the selected lunar month'
+              : localizeText('农历 birth_date 日期超出该月实际天数', locale));
+          }
+        } catch (_) {
+          errors.push(locale === 'en'
+            ? 'lunar birth_date could not be validated'
+            : localizeText('农历 birth_date 无法校验', locale));
+        }
+      }
+    } else {
+      const parsed = new Date(Date.UTC(year, month - 1, day));
+      const valid = parsed.getUTCFullYear() === year
+        && parsed.getUTCMonth() + 1 === month
+        && parsed.getUTCDate() === day;
+      if (!valid) {
+        errors.push(locale === 'en'
+          ? 'birth_date must be a valid calendar date'
+          : localizeText('birth_date 必须是有效的公历日期', locale));
+      }
     }
   }
 

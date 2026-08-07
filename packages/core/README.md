@@ -119,6 +119,8 @@ const result = calculateCycles({
 });
 
 console.log(result.yearCycle);
+console.log(result.decadeCycle);
+console.log(result.transitInteractions);
 console.log(result.monthlyCycles);
 console.log(result.dailyCycles);
 ```
@@ -322,6 +324,8 @@ const result = calculateCycles({
 });
 
 console.log(result.yearCycle);
+console.log(result.decadeCycle);
+console.log(result.transitInteractions);
 console.log(result.monthlyCycles);
 console.log(result.dailyCycles);
 ```
@@ -525,6 +529,8 @@ const result = calculateCycles({
 });
 
 console.log(result.yearCycle);
+console.log(result.decadeCycle);
+console.log(result.transitInteractions);
 console.log(result.monthlyCycles);
 console.log(result.dailyCycles);
 ```

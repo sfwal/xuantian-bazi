@@ -1,4 +1,9 @@
 const { TERMINOLOGY_VERSION, localizeChart, normalizeLocale } = require('./i18n/chartTerms');
+const {
+  ELEMENT_ORDER,
+  calculateFiveElementScores,
+  analyzeFiveElementBalance,
+} = require('./five-element-strength');
 
 /**
  * 标准化输出模块
@@ -71,6 +76,12 @@ function supportsElement(source, target) {
   return source === target || ELEMENT_GENERATE_MAP[source] === target;
 }
 
+function analyzeDayMasterStrength(fiveElements, dayMasterElement) {
+  const summary = fiveElements.summary || [];
+  const scores = Object.fromEntries(summary.map((item) => [item.element, item.score]));
+  return analyzeFiveElementBalance(scores, dayMasterElement);
+}
+
 function formatPatternName(star) {
   if (!star) return '';
   if (star.endsWith('格') || star.includes('元')) return star;
@@ -123,15 +134,16 @@ function attachShenShaToPillars(pillars, shenShaItems) {
 }
 
 function inferPattern(pillars, dayMaster, dayMasterElement, fiveElementSummary) {
-  const dmFe = (fiveElementSummary || []).find((f) => f.element === dayMasterElement);
-  const strong = dmFe && dmFe.percentage >= 25;
+  const strength = analyzeDayMasterStrength({ summary: fiveElementSummary || [] }, dayMasterElement);
+  const strong = strength.overallLabel === '偏旺';
   const mainStars = (pillars || []).map((p) => p.mainStar).filter(Boolean);
   if (mainStars.includes('正官') && mainStars.includes('正印')) return '官印相生格';
   if (mainStars.includes('食神') && mainStars.includes('正财')) return '食神生财格';
   if (mainStars.includes('七杀') && mainStars.includes('食神')) return '食神制杀格';
   if (mainStars.includes('伤官') && mainStars.includes('正印')) return '伤官佩印格';
   if (strong && mainStars.includes('正财')) return '身强财旺格';
-  if (!strong && mainStars.includes('正印')) return '身弱印扶格';
+  if (strength.overallLabel === '偏弱' && mainStars.includes('正印')) return '身弱印扶格';
+  if (strength.overallLabel === '中和') return '中和格';
   return strong ? '身强格' : '身弱格';
 }
 
@@ -162,15 +174,15 @@ function buildPatternSummary(pillars, dayMaster, dayMasterElement, fiveElementSu
 
 function buildDayMasterAnalysis(pillars, dayMaster, dayMasterElement, fiveElementSummary, useful, unfavorable) {
   const monthPillar = pillars.find((p) => p.type === 'month') || {};
-  const dmFe = (fiveElementSummary || []).find((f) => f.element === dayMasterElement);
-  const dmPercentage = dmFe?.percentage || 0;
+  const strength = analyzeDayMasterStrength({ summary: fiveElementSummary || [] }, dayMasterElement);
   const monthElement = ZHI_ELEMENT_MAP[monthPillar.diZhi || ''] || monthPillar.wuXing || '';
-  const rootCount = pillars.filter((pillar) => supportsElement(ZHI_ELEMENT_MAP[pillar.diZhi] || '', dayMasterElement)).length;
-  const supportCount = pillars.filter((pillar) => supportsElement(GAN_ELEMENT_MAP[pillar.tianGan] || '', dayMasterElement)).length;
+  const rootCount = pillars.filter((pillar) =>
+    (pillar.cangGanDetail || []).some((item) => item.wuXing === dayMasterElement)).length;
+  const supportCount = pillars.filter((pillar) =>
+    pillar.type !== 'day' && supportsElement(GAN_ELEMENT_MAP[pillar.tianGan] || '', dayMasterElement)).length;
   const seasonScore = supportsElement(monthElement, dayMasterElement) ? 1 : -1;
   const rootScore = rootCount >= 2 ? 1 : rootCount === 1 ? 0 : -1;
   const supportScore = supportCount >= 2 ? 1 : supportCount === 1 ? 0 : -1;
-  const totalScore = seasonScore + rootScore + supportScore + (dmPercentage >= 25 ? 1 : 0);
   const season = seasonScore > 0
     ? { label: '得令/失令', status: '得令', description: `以月令${monthPillar.diZhi || '-'}主气衡量，当前更偏得令。` }
     : { label: '得令/失令', status: '失令', description: `以月令${monthPillar.diZhi || '-'}主气衡量，当前更偏失令。` };
@@ -184,7 +196,7 @@ function buildDayMasterAnalysis(pillars, dayMaster, dayMasterElement, fiveElemen
     : supportScore === 0
       ? { label: '得势/失势', status: '半得势', description: '天干有一定同类或生扶力量，整体更偏半得势。' }
       : { label: '得势/失势', status: '失势', description: '天干同类与生扶力量不足，整体更偏失势。' };
-  const overallLabel = totalScore >= 2 ? '偏旺' : totalScore <= -1 ? '偏弱' : '中和';
+  const overallLabel = strength.overallLabel;
   const lines = [`日主${dayMaster}（${dayMasterElement}），${DAY_MASTER_ELEMENT_DESCRIPTIONS[dayMasterElement] || '需结合全局判断。'}`];
   if (useful?.length) lines.push(`喜用神：${useful.join('、')}。`);
   if (unfavorable?.length) lines.push(`忌神：${unfavorable.join('、')}。`);
@@ -433,21 +445,25 @@ function extractDayMaster(baziChart) {
 /**
  * 提取五行统计
  */
-function extractFiveElements(baziChart) {
+function extractFiveElements(baziChart, pillars) {
   const wxFz = baziChart['五行分值'] || {};
-  const elements = ['木', '火', '土', '金', '水'];
-  const summary = [];
+  const calculatedScores = calculateFiveElementScores(pillars);
+  const scores = Object.fromEntries(ELEMENT_ORDER.map((element) => [element, 0]));
 
-  for (const el of elements) {
-    const data = wxFz[el] || {};
-    summary.push({
-      element: el,
-      score: data['分值'] ?? data.score ?? 0,
-      percentage: data['占比'] ? parseInt(data['占比']) : 0,
-    });
+  if (calculatedScores) {
+    Object.assign(scores, calculatedScores);
+  } else {
+    for (const element of ELEMENT_ORDER) {
+      scores[element] = Number(wxFz[element]?.['分值'] ?? wxFz[element]?.score ?? 0);
+    }
   }
 
-  const total = summary.reduce((a, b) => a + b.score, 0) || 1;
+  const total = ELEMENT_ORDER.reduce((sum, element) => sum + scores[element], 0) || 1;
+  const summary = ELEMENT_ORDER.map((element) => ({
+    element,
+    score: Number(scores[element].toFixed(3)),
+    percentage: Math.round((scores[element] / total) * 100),
+  }));
   const sorted = [...summary].sort((a, b) => b.score - a.score);
 
   return {
@@ -493,52 +509,12 @@ function extractTenGods(baziChart) {
 }
 
 /**
- * 五行相生判断
- */
-function isGenerating(a, b) {
-  const cycle = { '木': '火', '火': '土', '土': '金', '金': '水', '水': '木' };
-  return cycle[a] === b;
-}
-
-/**
  * 提取喜用神/忌神
  */
 function extractUsefulUnfavorable(fiveElements) {
-  const summary = fiveElements.summary || [];
   const dayMasterElement = fiveElements.dayMasterElement || '';
-  const sorted = [...summary].sort((a, b) => b.score - a.score);
-
-  const dayMasterScore = summary.find((s) => s.element === dayMasterElement);
-  const isWeak = dayMasterScore && dayMasterScore.percentage < 18;
-
-  const useful = [];
-  const unfavorable = [];
-
-  if (isWeak) {
-    for (const s of sorted) {
-      if (s.element === dayMasterElement || isGenerating(s.element, dayMasterElement)) {
-        useful.push(s.element);
-      }
-    }
-    for (const s of sorted) {
-      if (!useful.includes(s.element)) {
-        unfavorable.push(s.element);
-      }
-    }
-  } else {
-    for (const s of sorted) {
-      if (s.element !== dayMasterElement && !isGenerating(s.element, dayMasterElement)) {
-        useful.push(s.element);
-      }
-    }
-    for (const s of sorted) {
-      if (!useful.includes(s.element)) {
-        unfavorable.push(s.element);
-      }
-    }
-  }
-
-  return { useful, unfavorable };
+  const strength = analyzeDayMasterStrength(fiveElements, dayMasterElement);
+  return { useful: strength.useful, unfavorable: strength.unfavorable };
 }
 
 /**
@@ -597,9 +573,9 @@ function normalize(rawResult, input) {
 
   // 基础提取
   const pillars = extractPillars(baziChart);
-  const fiveElements = extractFiveElements(baziChart);
-  const tenGods = extractTenGods(baziChart);
   const dayMaster = extractDayMaster(baziChart);
+  const fiveElements = extractFiveElements(baziChart, pillars);
+  const tenGods = extractTenGods(baziChart);
   const { useful, unfavorable } = extractUsefulUnfavorable(fiveElements);
   const interactions = extractInteractions(baziChart);
   const daYunList = extractDaYunList(baziChart);
@@ -608,17 +584,23 @@ function normalize(rawResult, input) {
   const bzPillars = (baziChart['四柱'] || '').split(' ');
 
   // 转换大运/流年/流月
-  const decadeCycles = (cycles?.decade_cycles || []).map((dc) => ({
-    label: dc.label,
-    value: dc.value,
-    sub_value: dc.sub_value,
-    active: dc.active || false,
-    start_age: dc.startAge,
-    start_year: dc.startYear,
-    end_year: dc.endYear,
-    yearly_cycles: dc.yearly_cycles || [],
-    monthly_cycles: dc.monthly_cycles || {},
-  }));
+  const decadeCycles = (cycles?.decade_cycles || []).map((dc) => {
+    const details = daYunList.find((item) => item.ganZhi === dc.label
+      && Number(item.startYear) === Number(dc.startYear));
+    return {
+      label: dc.label,
+      value: dc.value,
+      sub_value: dc.sub_value,
+      active: dc.active || false,
+      start_age: dc.startAge,
+      end_age: dc.endAge,
+      start_year: dc.startYear,
+      end_year: dc.endYear,
+      main_star: details?.mainStar || '',
+      yearly_cycles: dc.yearly_cycles || [],
+      monthly_cycles: dc.monthly_cycles || {},
+    };
+  });
 
   const allYearlyCycles = [];
   for (const dc of cycles?.decade_cycles || []) {
@@ -745,7 +727,7 @@ function normalize(rawResult, input) {
     },
 
     // 元信息
-    engine_version: 'v1.1',
+    engine_version: 'v1.3',
     locale,
     terminology_version: TERMINOLOGY_VERSION,
     created_at: new Date().toISOString(),

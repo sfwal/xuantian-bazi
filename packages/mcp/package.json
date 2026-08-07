@@ -1,6 +1,6 @@
 {
   "name": "xuantian-bazi-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP stdio server for the Xuantian BaZi chart engine",
   "keywords": [
     "mcp",
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "xuantian-bazi": "0.1.1",
+    "xuantian-bazi": "0.2.0",
     "zod": "^4.0.0"
   },
   "engines": {

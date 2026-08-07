@@ -13,7 +13,7 @@ import type {
 
 export * from './types.js';
 
-export const ENGINE_VERSION = '0.1.0';
+export const ENGINE_VERSION = '0.2.0';
 
 export class ChartEngineError extends Error {
   readonly code: number;
@@ -81,7 +81,9 @@ export function calculateCycles(input: CycleInput): CycleResult {
   return {
     year: data.year,
     month: data.month,
+    decadeCycle: data.decade_cycle,
     yearCycle: data.year_cycle,
+    transitInteractions: data.transit_interactions,
     monthlyCycles: data.monthly_cycles,
     dailyCycles: data.daily_cycles,
     locale: data.locale,

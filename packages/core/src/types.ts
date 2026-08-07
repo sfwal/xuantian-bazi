@@ -104,7 +104,9 @@ export interface ChartResult {
 export interface LegacyCycleData extends Record<string, unknown> {
   year: number;
   month: number | null;
+  decade_cycle: Record<string, unknown> | null;
   year_cycle: Record<string, unknown>;
+  transit_interactions: TransitInteraction[];
   monthly_cycles: Array<Record<string, unknown>>;
   daily_cycles: Array<Record<string, unknown>>;
   locale: Locale;
@@ -114,9 +116,19 @@ export interface LegacyCycleData extends Record<string, unknown> {
 export interface CycleResult {
   year: number;
   month: number | null;
+  decadeCycle: Record<string, unknown> | null;
   yearCycle: Record<string, unknown>;
+  transitInteractions: TransitInteraction[];
   monthlyCycles: Array<Record<string, unknown>>;
   dailyCycles: Array<Record<string, unknown>>;
   locale: Locale;
   terminologyVersion: string;
+}
+
+export interface TransitInteraction {
+  type: string;
+  source_a: string;
+  source_b: string;
+  chars: string;
+  relation: string;
 }

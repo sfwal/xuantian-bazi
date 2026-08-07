@@ -218,7 +218,9 @@ function convertLunarToSolar(lunarDate, isLeapMonth = false) {
 
 function applyDSTCorrection(hour, minute, year, month, day) {
   const dstPeriods = [
-    { year: 1986, start: [4, 13], end: [9, 14] },
+    // China first introduced nationwide DST on 1986-05-04. Transitions
+    // happened at 02:00 local time, so the time of day must be compared too.
+    { year: 1986, start: [5, 4], end: [9, 14] },
     { year: 1987, start: [4, 12], end: [9, 13] },
     { year: 1988, start: [4, 10], end: [9, 11] },
     { year: 1989, start: [4, 16], end: [9, 17] },
@@ -231,11 +233,11 @@ function applyDSTCorrection(hour, minute, year, month, day) {
     return { year, month, day, hour, minute, dstApplied: false, dstMinutes: 0 };
   }
 
-  const dateValue = month * 100 + day;
-  const startValue = period.start[0] * 100 + period.start[1];
-  const endValue = period.end[0] * 100 + period.end[1];
+  const localTime = Date.UTC(year, month - 1, day, hour, minute, 0);
+  const startTime = Date.UTC(year, period.start[0] - 1, period.start[1], 2, 0, 0);
+  const endTime = Date.UTC(year, period.end[0] - 1, period.end[1], 2, 0, 0);
 
-  if (dateValue >= startValue && dateValue < endValue) {
+  if (localTime >= startTime && localTime < endTime) {
     const corrected = addMinutesToDateParts(year, month, day, hour, minute, -60);
     return { ...corrected, dstApplied: true, dstMinutes: -60 };
   }
@@ -345,9 +347,9 @@ function computeCycles(year, month, day, hour, minute, gender, options = {}) {
   const eightChar = lunar.getEightChar();
   const dayGan = eightChar.getDay()[0];
 
-  // lunar-javascript getYun: 0=男(forward), 1=女(backward)
+  // lunar-javascript getYun: 1=男, 0=女；顺逆排由年干阴阳和性别共同决定。
   // 我们的 gender: 1=男, 2=女
-  const yunGender = gender === 1 ? 0 : 1;
+  const yunGender = gender === 1 ? 1 : 0;
   const yun = eightChar.getYun(yunGender);
   const daYunList = yun.getDaYun();
   const detailYear = Number.isInteger(options.detailYear) ? options.detailYear : null;
@@ -417,6 +419,7 @@ function computeCycles(year, month, day, hour, minute, gender, options = {}) {
       sub_value: `${daYun.getStartYear()}-${daYun.getEndYear()}`,
       active: isCurrent,
       startAge: daYun.getStartAge(),
+      endAge: daYun.getEndAge(),
       startYear: daYun.getStartYear(),
       endYear: daYun.getEndYear(),
       yearly_cycles: yearlyCycles,
